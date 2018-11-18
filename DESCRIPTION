@@ -8,7 +8,7 @@ Description: Connecting disease gene expression signatures to
     a new disease indication. RCSM is an R package for measuring those 
     connectivities. RCSM implemented seven methods that are reported in 
     published papers.
-Depends: R (>= 3.4.0)
+Depends: R (>= 2.1.13)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
