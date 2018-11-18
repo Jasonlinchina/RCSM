@@ -1,0 +1,92 @@
+#' eXtremeSum
+#'
+#' The implementation of eXtremeSum
+#'
+#' @details `eXtremeSumScore()` returns a data.frame, each row of which contains score,
+#'   pValue and adjusted-pValue for one sample in the refMatrix.
+#' @references "Cheng J et al. Genome medicine, 2014, 6(12): 95".
+#' @param refMatrix A matrix
+#' @param queryUp,queryDown character vectors.
+#' @param permuteNum number of perturbation time for computing pValue
+#' @param topN number of genes in top and bottom of reference gene list
+#' @param pAdjMethod method to use for computing adjudted-pValue
+#' @param mcCore the number of core to use for parallel computing
+#' @importFrom parallel mclapply
+#' @export
+#' @examples
+#' set.seed(1234)
+#' ref <- matrix(rnorm(1000), nrow = 10,
+#'   dimnames = list(paste0("gene", 1:10), paste0("drug", 1:100)))
+#' Up <- c("gene1", "gene2")
+#' Down <- c("gene9", "gene10")
+#' eXtremeSumScore(refMatrix = ref, queryUp = Up, queryDown = Down, topN = 4)
+
+#######################The implementation of eXtremeSum#########################
+eXtremeSumScore <- function(refMatrix, queryUp, queryDown, topN = 500,
+                            permuteNum = 10000, pAdjMethod = "BH", mcCore = 1) {
+
+  if (is.data.frame(refMatrix)) {refMatrix <- as.matrix(refMatrix)}
+
+  if (is.null(colnames(refMatrix)) || is.null(rownames(refMatrix))) {
+    stop("Warning: refMatrix should have both rownames and colnames!")
+  }
+
+  if (!is.character(queryUp)) {queryUp <- as.character(queryUp)}
+  if (!is.character(queryDown)) {queryUp <- as.character(queryDown)}
+
+  if (topN > nrow(refMatrix) / 2) {stop("Warning: topN is lager than half
+                                        the length of gene list!")}
+
+  ## Convert the gene expression matrix to ranked list. topN is the number of
+  ## genes in the ranked top, which can be reseted.
+  matrixToRankedList <- function(refMatrix, topN) {
+    ## Allocate memory for the refList
+    refList <- vector("list", ncol(refMatrix))
+    for(i in 1:ncol(refMatrix)) {
+      ## Sort the reference gene lists based on fold change of gene expression.
+      ## And get head topN genes and tail topN genes.
+      refList[[i]] <- c(head(refMatrix[order(refMatrix[, i], decreasing=TRUE), i],
+                             n = topN),
+                        tail(refMatrix[order(refMatrix[, i], decreasing=TRUE), i],
+                             n = topN))
+    }
+    return(refList)
+  }
+  ## The core part for computing the eXtremeSum score
+  eXtremeSum <- function(refList, queryUp, queryDown) {
+    scoreUp <- sum(refList[match(queryUp, names(refList))], na.rm = T)
+    scoreDown <- sum(refList[match(queryDown, names(refList))], na.rm = T)
+    return(scoreUp - scoreDown)
+  }
+
+  ## Prepare the ranked reference lists
+  refList <- matrixToRankedList(refMatrix, topN = topN)
+  ## Compute the scores for each sample in the reference lists. mcCore is the
+  ## number of cores to use for parallel computing. Set it based on your computer.
+  score <- mclapply(refList, eXtremeSum, queryUp = queryUp,
+                    queryDown = queryDown, mc.cores = mcCore)
+  score <- as.vector(do.call(rbind, score))
+  ## Allocate memory for the permuteScore that are used to compute the p-value.
+  ## The permuteNum can be reseted. Notice large permuteNum means low speed.
+  permuteScore <- matrix(0, ncol = permuteNum, nrow = ncol(refMatrix))
+  for(n in 1:permuteNum) {
+    ## Prepare the random query signatures
+    bootUp <- sample(rownames(refMatrix), size = length(queryUp))
+    bootDown <- sample(rownames(refMatrix), size = length(queryDown))
+    ## Compute the random scores for each sample in the reference lists
+    bootScore <- mclapply(refList, eXtremeSum, queryUp = bootUp,
+                          queryDown = bootDown, mc.cores = mcCore)
+    permuteScore[, n] <- as.vector(do.call(rbind, bootScore))
+  }
+  permuteScore[is.na(permuteScore)] <- 0
+  ## Compute the p-value based on bootstrap method
+  pValue <- rowSums(abs(permuteScore) >= abs(score)) / permuteNum
+  ## Compute the adjusted p-value. The adjusting method can be reseted
+  ## (Refer to p.adjust()).
+  pAdjust <- p.adjust(pValue, method = pAdjMethod)
+
+  scoreResult <- data.frame(Score = score, pValue = pValue, pAdjValue = pAdjust)
+  rownames(scoreResult) <- colnames(refMatrix)
+  return(scoreResult)
+}
+################################################################################
