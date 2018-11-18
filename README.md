@@ -29,9 +29,11 @@ GSEAweight2Score(refMatrix, queryUp, queryDown, permuteNum = 10000,
 zhangScore(refMatrix, queryUp, queryDown, permuteNum = 10000,
   pAdjMethod = "BH", mcCore = 1)
 
-How to install this package?
-
+# How to install this package?
 install.packages("devtools")
+
 library(devtools)
+
 install_github("Jasonlinchina/RCSM")
+
 library(RCSM)
