@@ -37,3 +37,5 @@ library(devtools)
 install_github("Jasonlinchina/RCSM")
 
 library(RCSM)
+
+# If there is any bug or suggestion, please contact kequanlin@gmail.com
