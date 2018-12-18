@@ -10,7 +10,8 @@ zhangScore(refMatrix, queryUp, queryDown, permuteNum = 10000,
 \arguments{
 \item{refMatrix}{A matrix}
 
-\item{queryUp, queryDown}{character vectors.}
+\item{queryUp, queryDown}{character vectors. if there is no up or down signatures,
+you should set: queryUp = NULL or queryDown = NULL.}
 
 \item{permuteNum}{number of perturbation time for computing pValue}
 

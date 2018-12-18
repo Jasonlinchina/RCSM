@@ -1,6 +1,6 @@
 Package: RCSM
 Title: RCSM(Recommended Connectivity-map Scoring Methods)
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Kequan", "Lin", email = "kequanlin@gmail.com", role = c("aut", "cre"))
 Description: Connecting disease gene expression signatures to
     compound-induced gene expression profiles is valuable for understanding
@@ -12,3 +12,4 @@ Depends: R (>= 2.14.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.1.1
