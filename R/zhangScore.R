@@ -6,7 +6,8 @@
 #' pValue and adjusted-pValue for one sample in the refMatrix.
 #' @references "Zhang S D et al. BMC bioinformatics, 2008, 9(1): 258".
 #' @param refMatrix A matrix
-#' @param queryUp,queryDown character vectors.
+#' @param queryUp,queryDown character vectors. if there is no up or down signatures,
+#' you should set: queryUp = NULL or queryDown = NULL.
 #' @param permuteNum number of perturbation time for computing pValue
 #' @param pAdjMethod method to use for computing adjudted-pValue
 #' @param mcCore the number of core to use for parallel computing
@@ -30,6 +31,9 @@ zhangScore <- function(refMatrix, queryUp, queryDown,
   if (is.null(colnames(refMatrix)) || is.null(rownames(refMatrix))) {
     stop("Warning: refMatrix should have both rownames and colnames!")
   }
+
+  if (is.null(queryUp)) {queryUp <- character(0)}
+  if (is.null(queryDown)) {queryDown <- character(0)}
 
   if (!is.character(queryUp)) {queryUp <- as.character(queryUp)}
   if (!is.character(queryDown)) {queryUp <- as.character(queryDown)}
