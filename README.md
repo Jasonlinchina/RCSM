@@ -42,5 +42,5 @@ library(RCSM)
 
 # FAQ
 1, If you encounter the error saying "readRDS(dest) XXX" when installing
-the RCSM, you could first remove the old version of RCSM with "remove.package(RCSM)",
+the RCSM, you could first remove the old version of RCSM with "remove.packages("RCSM")",
 and then restart the R or Rstudio.
