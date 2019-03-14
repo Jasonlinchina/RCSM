@@ -1,8 +1,8 @@
-#' cmapScore
+#' KSScore
 #'
-#' The implementation of cmapScore
+#' The implementation of KSScore
 #'
-#' @details `cmapScore()` returns a data.frame, each row of which contains score,
+#' @details `KSScore()` returns a data.frame, each row of which contains score,
 #'   pValue and adjusted-pValue for one sample in the refMatrix.
 #' @references "Lamb J et al. science, 2006, 313(5795): 1929-1935".
 #' @param refMatrix A matrix
@@ -18,10 +18,10 @@
 #'   dimnames = list(paste0("gene", 1:10), paste0("drug", 1:100)))
 #' Up <- c("gene1", "gene2")
 #' Down <- c("gene9", "gene10")
-#' cmapScore(refMatrix = ref, queryUp = Up, queryDown = Down)
+#' KSScore(refMatrix = ref, queryUp = Up, queryDown = Down)
 
 ##########################The implementation of cMAP############################
-cmapScore <- function(refMatrix, queryUp, queryDown, permuteNum = 10000,
+KSScore <- function(refMatrix, queryUp, queryDown, permuteNum = 10000,
                       pAdjMethod = "BH", mcCore = 1) {
 
   if (is.data.frame(refMatrix)) {refMatrix <- as.matrix(refMatrix)}

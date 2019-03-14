@@ -1,8 +1,8 @@
-#' eXtremeSum
+#' XSum
 #'
-#' The implementation of eXtremeSum
+#' The implementation of XSum
 #'
-#' @details `eXtremeSumScore()` returns a data.frame, each row of which contains score,
+#' @details `XSumScore()` returns a data.frame, each row of which contains score,
 #'   pValue and adjusted-pValue for one sample in the refMatrix.
 #' @references "Cheng J et al. Genome medicine, 2014, 6(12): 95".
 #' @param refMatrix A matrix
@@ -19,10 +19,10 @@
 #'   dimnames = list(paste0("gene", 1:10), paste0("drug", 1:100)))
 #' Up <- c("gene1", "gene2")
 #' Down <- c("gene9", "gene10")
-#' eXtremeSumScore(refMatrix = ref, queryUp = Up, queryDown = Down, topN = 4)
+#' XSumScore(refMatrix = ref, queryUp = Up, queryDown = Down, topN = 4)
 
-#######################The implementation of eXtremeSum#########################
-eXtremeSumScore <- function(refMatrix, queryUp, queryDown, topN = 500,
+#######################The implementation of XSum#########################
+XSumScore <- function(refMatrix, queryUp, queryDown, topN = 500,
                             permuteNum = 10000, pAdjMethod = "BH", mcCore = 1) {
 
   if (is.data.frame(refMatrix)) {refMatrix <- as.matrix(refMatrix)}
@@ -52,8 +52,8 @@ eXtremeSumScore <- function(refMatrix, queryUp, queryDown, topN = 500,
     }
     return(refList)
   }
-  ## The core part for computing the eXtremeSum score
-  eXtremeSum <- function(refList, queryUp, queryDown) {
+  ## The core part for computing the XSum score
+  XSum <- function(refList, queryUp, queryDown) {
     scoreUp <- sum(refList[match(queryUp, names(refList))], na.rm = T)
     scoreDown <- sum(refList[match(queryDown, names(refList))], na.rm = T)
     return(scoreUp - scoreDown)
@@ -63,7 +63,7 @@ eXtremeSumScore <- function(refMatrix, queryUp, queryDown, topN = 500,
   refList <- matrixToRankedList(refMatrix, topN = topN)
   ## Compute the scores for each sample in the reference lists. mcCore is the
   ## number of cores to use for parallel computing. Set it based on your computer.
-  score <- mclapply(refList, eXtremeSum, queryUp = queryUp,
+  score <- mclapply(refList, XSum, queryUp = queryUp,
                     queryDown = queryDown, mc.cores = mcCore)
   score <- as.vector(do.call(rbind, score))
   ## Allocate memory for the permuteScore that are used to compute the p-value.
@@ -74,7 +74,7 @@ eXtremeSumScore <- function(refMatrix, queryUp, queryDown, topN = 500,
     bootUp <- sample(rownames(refMatrix), size = length(queryUp))
     bootDown <- sample(rownames(refMatrix), size = length(queryDown))
     ## Compute the random scores for each sample in the reference lists
-    bootScore <- mclapply(refList, eXtremeSum, queryUp = bootUp,
+    bootScore <- mclapply(refList, XSum, queryUp = bootUp,
                           queryDown = bootDown, mc.cores = mcCore)
     permuteScore[, n] <- as.vector(do.call(rbind, bootScore))
   }

@@ -1,8 +1,8 @@
-#' zhangScore
+#' ZhangScore
 #'
-#' The implementation of zhangScore
+#' The implementation of ZhangScore
 #'
-#' @details `zhangScore()` returns a data.frame, each row of which contains score,
+#' @details `ZhangScore()` returns a data.frame, each row of which contains score,
 #' pValue and adjusted-pValue for one sample in the refMatrix.
 #' @references "Zhang S D et al. BMC bioinformatics, 2008, 9(1): 258".
 #' @param refMatrix A matrix
@@ -19,10 +19,10 @@
 #'   dimnames = list(paste0("gene", 1:10), paste0("drug", 1:100)))
 #' Up <- c("gene1", "gene2")
 #' Down <- c("gene9", "gene10")
-#' zhangScore(refMatrix = ref, queryUp = Up, queryDown = Down)
+#' ZhangScore(refMatrix = ref, queryUp = Up, queryDown = Down)
 
 #######################The implementation of zhangscore#########################
-zhangScore <- function(refMatrix, queryUp, queryDown,
+ZhangScore <- function(refMatrix, queryUp, queryDown,
                                    permuteNum = 10000, pAdjMethod = "BH",
                                    mcCore = 1) {
 
