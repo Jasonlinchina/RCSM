@@ -1,8 +1,8 @@
-#' eXtremeCos
+#' XCos
 #'
-#' The implementation of eXtremeCos
+#' The implementation of XCos
 #'
-#' @details `eXtremeCosScore()` returns a data.frame, each row of which contains
+#' @details `XCosScore()` returns a data.frame, each row of which contains
 #'   score, pValue and adjusted-pValue for one sample in the refMatrix.
 #' @references "Cheng J et al. Genome medicine, 2014, 6(12): 95".
 #' @param refMatrix A matrix
@@ -19,10 +19,10 @@
 #'   dimnames = list(paste0("gene", 1:10), paste0("drug", 1:100)))
 #' query <- rnorm(4)
 #' names(query) <- c("gene1", "gene2", "gene9", "gene10")
-#' eXtremeCosScore(refMatrix = ref, query = query, topN = 4)
+#' XCosScore(refMatrix = ref, query = query, topN = 4)
 
-#######################The implementation of eXtremeCos#########################
-eXtremeCosScore <- function(refMatrix, query, topN = 500, permuteNum = 10000,
+#######################The implementation of XCos#########################
+XCosScore <- function(refMatrix, query, topN = 500, permuteNum = 10000,
                             pAdjMethod = "BH", mcCore = 1) {
 
   if (is.data.frame(refMatrix)) {refMatrix <- as.matrix(refMatrix)}
@@ -53,8 +53,8 @@ eXtremeCosScore <- function(refMatrix, query, topN = 500, permuteNum = 10000,
     }
     return(refList)
   }
-  ## The core part for computing the eXtremeCos score
-  eXtremeCos <- function(refList, query) {
+  ## The core part for computing the XCos score
+  XCos <- function(refList, query) {
     reservedRef <- refList[match(intersect(names(refList), names(query)),
                                  names(refList))]
     reservedRef[order(names(reservedRef))]
@@ -75,7 +75,7 @@ eXtremeCosScore <- function(refMatrix, query, topN = 500, permuteNum = 10000,
   refList <- matrixToRankedList(refMatrix, topN = topN)
   ## Compute the scores for each sample in the reference lists. mcCore is the
   ## number of cores to use for parallel computing. Set it based on your computer.
-  score <- mclapply(refList, eXtremeCos, query = query, mc.cores = mcCore)
+  score <- mclapply(refList, XCos, query = query, mc.cores = mcCore)
   score <- as.vector(do.call(rbind, score))
   ## Allocate memory for the permuteScore that are used to compute the p-value.
   ## The permuteNum can be reseted. Notice large permuteNum means low speed.
@@ -84,7 +84,7 @@ eXtremeCosScore <- function(refMatrix, query, topN = 500, permuteNum = 10000,
     ## Prepare the random query signatures
     names(query) <- sample(rownames(refMatrix), size = length(query))
     ## Compute the random scores for each sample in the reference lists
-    bootScore <- mclapply(refList, eXtremeCos, query = query, mc.cores = mcCore)
+    bootScore <- mclapply(refList, XCos, query = query, mc.cores = mcCore)
     permuteScore[, n] <- as.vector(do.call(rbind, bootScore))
   }
   permuteScore[is.na(permuteScore)] <- 0
